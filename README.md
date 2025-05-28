@@ -21,7 +21,7 @@
 
 ### 1. Clone the repository
 ```sh
-git clone <your-repo-url>
+git clone https://github.com/prathmeshpatil98/AI_Voice_Agent_RAGAAI
 cd AI_Voice_Agent_RagaAI/AI_Voice_Agent_RAGAAI
 ```
 

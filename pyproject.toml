@@ -1,0 +1,15 @@
+[project]
+name = "ai-voice-agent-ragaai"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai-whisper",
+    "pytest>=8.3.5",
+    "streamlit-webrtc>=0.62.4",
+    "whisper>=1.1.10",
+]
+
+[tool.uv.sources]
+openai-whisper = { git = "https://github.com/openai/whisper.git" }

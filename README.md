@@ -2,7 +2,6 @@
 
 ## Architecture
 
-![Architecture Diagram](docs/architecture.png)
 
 - **orchestrator/**: Main FastAPI app, routes, and orchestration logic
 - **agents/**: Modular agents (API, scraping, LangChain, voice pipeline)
@@ -71,22 +70,22 @@ pytest tests/
 
 ## Framework/Toolkit Comparison
 
-| Feature         | RagaAI (This Project) | LangChain | LlamaIndex | Haystack |
-|----------------|----------------------|-----------|------------|----------|
-| Vector Search  | Redis Stack          | FAISS, Chroma, etc. | FAISS, Qdrant, etc. | FAISS, Milvus, etc. |
-| Orchestration  | FastAPI, modular     | Chains, Agents      | Query Engines       | Pipelines           |
-| Voice          | Custom STT/TTS       | Plugin-based        | Plugin-based        | Plugin-based        |
-| UI             | Streamlit            | Streamlit           | Streamlit           | Streamlit           |
-| Data Ingestion | Custom scripts       | Integrations        | Integrations        | Integrations        |
-| Dependency Mgmt| uv, pip, venv        | pip, poetry         | pip, poetry         | pip, poetry         |
+| Feature         | RagaAI (This Project) 
+|----------------|----------------------
+| Vector Search  | Redis Stack          
+| Orchestration  | FastAPI, modular     
+| Voice          | Custom STT/TTS       
+| UI             | Streamlit            
+| Data Ingestion | Custom scripts       
+| Dependency Mgmt| uv, pip, venv        
 
 ## Performance Benchmarks
 
-| Task                | RagaAI (Redis Stack) | LangChain (FAISS) | LlamaIndex (Qdrant) |
-|---------------------|---------------------|-------------------|---------------------|
-| Vector Search (1k)  | ~10ms               | ~8ms              | ~9ms                |
-| Indexing (1k docs)  | ~1.2s               | ~1.0s             | ~1.1s               |
-| STT (10s audio)     | ~2s                 | N/A               | N/A                 |
+| Task                | RagaAI (Redis Stack) | LangChain (FAISS) 
+|---------------------|---------------------|-------------------|
+| Vector Search (1k)  | ~10ms               | ~8ms              |
+| Indexing (1k docs)  | ~1.2s               | ~1.0s             |
+| STT (10s audio)     | ~2s                 | N/A               |
 
 *Benchmarks are indicative and depend on hardware/configuration.*
 
@@ -106,8 +105,7 @@ pytest tests/
 - `tests/` — Unit and integration tests
 
 ## Contributors
-- Your Name
-- ...
+- Prathmesh Patil
 
 ## License
 MIT License

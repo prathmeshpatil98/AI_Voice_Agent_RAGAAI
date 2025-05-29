@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Voice Finance Assistant</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f7f7fa; margin: 0; padding: 0; }
+        .container { max-width: 700px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+        h1 { text-align: center; }
+        .chat-history { height: 320px; overflow-y: auto; border: 1px solid #eee; border-radius: 6px; padding: 12px; background: #fafbfc; margin-bottom: 16px; }
+        .msg { margin-bottom: 12px; }
+        .msg.user { text-align: right; color: #2a7ae2; }
+        .msg.bot { text-align: left; color: #222; }
+        .error { color: #c00; margin: 8px 0; }
+        .audio-controls { margin-top: 12px; }
+        .record-btn { background: #2a7ae2; color: #fff; border: none; border-radius: 4px; padding: 8px 16px; cursor: pointer; }
+        .record-btn[disabled] { background: #aaa; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>AI Voice Finance Assistant</h1>
+    <div class="chat-history" id="chat-history"></div>
+    <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Type your question..." style="width:80%;padding:8px;" required>
+        <button type="submit">Send</button>
+    </form>
+    <div class="audio-controls">
+        <button id="record-btn" class="record-btn">🎤 Record</button>
+        <input type="file" id="audio-upload" accept="audio/*">
+    </div>
+    <div id="error" class="error"></div>
+</div>
+<script>
+const chatHistory = document.getElementById('chat-history');
+const chatForm = document.getElementById('chat-form');
+const chatInput = document.getElementById('chat-input');
+const errorDiv = document.getElementById('error');
+const recordBtn = document.getElementById('record-btn');
+const audioUpload = document.getElementById('audio-upload');
+let mediaRecorder, audioChunks = [], isRecording = false;
+
+function appendMessage(text, sender, audioUrl=null) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + sender;
+    div.textContent = text;
+    if (audioUrl) {
+        const audio = document.createElement('audio');
+        audio.controls = true;
+        audio.src = audioUrl;
+        div.appendChild(document.createElement('br'));
+        div.appendChild(audio);
+    }
+    chatHistory.appendChild(div);
+    chatHistory.scrollTop = chatHistory.scrollHeight;
+}
+
+chatForm.onsubmit = async (e) => {
+    e.preventDefault();
+    const text = chatInput.value.trim();
+    if (!text) return;
+    appendMessage(text, 'user');
+    chatInput.value = '';
+    errorDiv.textContent = '';
+    try {
+        const resp = await fetch('/chat', {
+            method: 'POST',
+            body: new URLSearchParams({text}),
+        });
+        const data = await resp.json();
+        if (data.answer) {
+            appendMessage(data.answer, 'bot');
+        } else {
+            errorDiv.textContent = data.error || 'No answer.';
+        }
+    } catch (err) {
+        errorDiv.textContent = 'Error: ' + err;
+    }
+};
+
+recordBtn.onclick = async () => {
+    if (isRecording) {
+        mediaRecorder.stop();
+        recordBtn.textContent = '🎤 Record';
+        recordBtn.disabled = true;
+    } else {
+        errorDiv.textContent = '';
+        audioChunks = [];
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            mediaRecorder = new MediaRecorder(stream);
+            mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'recording.webm');
+                try {
+                    const resp = await fetch('/voice', { method: 'POST', body: formData });
+                    const data = await resp.json();
+                    if (data.answer) {
+                        let audioUrl = null;
+                        if (data.audio_file) {
+                            audioUrl = '/audio/' + data.audio_file;
+                        }
+                        appendMessage(data.answer, 'bot', audioUrl);
+                    } else {
+                        errorDiv.textContent = data.error || 'No answer.';
+                    }
+                } catch (err) {
+                    errorDiv.textContent = 'Error: ' + err;
+                }
+                recordBtn.disabled = false;
+            };
+            mediaRecorder.start();
+            recordBtn.textContent = '⏹ Stop';
+            isRecording = true;
+        } catch (err) {
+            errorDiv.textContent = 'Microphone error: ' + err;
+        }
+    }
+};
+
+audioUpload.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    errorDiv.textContent = '';
+    const formData = new FormData();
+    formData.append('audio', file);
+    try {
+        const resp = await fetch('/voice', { method: 'POST', body: formData });
+        const data = await resp.json();
+        if (data.answer) {
+            let audioUrl = null;
+            if (data.audio_file) {
+                audioUrl = '/audio/' + data.audio_file;
+            }
+            appendMessage(data.answer, 'bot', audioUrl);
+        } else {
+            errorDiv.textContent = data.error || 'No answer.';
+        }
+    } catch (err) {
+        errorDiv.textContent = 'Error: ' + err;
+    }
+};
+</script>
+</body>
+</html>
